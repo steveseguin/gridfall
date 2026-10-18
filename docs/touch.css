@@ -1,0 +1,36 @@
+#touch-controls { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+#touch-controls button { pointer-events: auto; touch-action: none; color: #e0c996; background: rgba(22,32,30,.78); border: 2px solid #72765c; border-radius: 4px; min-width: 48px; min-height: 48px; padding: 8px; font: 14px "GRIDFALL HUD", monospace; }
+#touch-controls button.pressed, #touch-controls button:active { background: #66573b; border-color: #ffdda2; }
+#touch-controls button:focus-visible { outline: 2px solid #ffdda2; }
+.touch-mode { margin: 0; padding: 0; max-width: none; overflow: hidden; overscroll-behavior: none; }
+.touch-mode > header, .touch-mode > p, .touch-mode > .controls, .touch-mode > footer { display: none; }
+.touch-mode > #load-error:not([hidden]) { display: block; }
+.touch-mode.touch-loading > #status { display: block; position: fixed; top: max(8px, env(safe-area-inset-top)); left: 12px; right: 12px; z-index: 6; padding: 8px; background: #111b1b; font-size: 14px; pointer-events: none; }
+.touch-mode .stage { width: 100%; height: 100vh; height: 100dvh; box-sizing: border-box; background: #090f10; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.touch-mode #game { position: absolute; outline: none; touch-action: none; }
+.touch-mode #front-menu { z-index: 2; touch-action: manipulation; }
+#touch-controls .touch-stick { position: absolute; width: 112px; height: 112px; border-radius: 50%; bottom: calc(var(--hud-bottom, 45px) + 8px); background: rgba(22,32,30,.35); display: flex; justify-content: center; align-items: center; }
+.touch-stick span { display: flex; align-items: center; justify-content: center; width: 62px; height: 62px; border: 2px solid #9b9775; border-radius: 50%; background: rgba(25,35,32,.8); font-size: 12px; pointer-events: none; }
+#touch-move { left: max(16px, env(safe-area-inset-left)); }
+#touch-look { right: max(16px, env(safe-area-inset-right)); }
+.touch-tools { position: absolute; top: max(6px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+#touch-controls .touch-fire, #touch-controls .touch-use { position: absolute; right: calc(144px + env(safe-area-inset-right, 0px)); bottom: calc(var(--hud-bottom, 45px) + 64px); width: 68px; }
+#touch-controls .touch-use { bottom: calc(var(--hud-bottom, 45px) + 8px); }
+#touch-controls #touch-run { position: absolute; left: calc(144px + env(safe-area-inset-left, 0px)); bottom: calc(var(--hud-bottom, 45px) + 8px); }
+#touch-navigation { position: absolute; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 6px; }
+#touch-navigation button { font-family: monospace; font-weight: bold; }
+#touch-controls #touch-hide { min-width: 44px; font-size: 11px; }
+#touch-chat { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 10px; }
+.touch-mode #chat-entry:not([hidden]) { opacity: 1; pointer-events: auto; z-index: 6; top: auto; bottom: 72px; left: 5%; width: 90%; max-width: none; height: 44px; box-sizing: border-box; padding: 8px; font: 16px monospace; border: 2px solid #d38d4d; background: #111b1b; }
+.touch-portrait #touch-controls .touch-stick { bottom: calc(160px + env(safe-area-inset-bottom, 0px)); }
+.touch-portrait #touch-controls .touch-fire { right: 20px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); width: 80px; height: 64px; }
+.touch-portrait #touch-controls .touch-use { right: 112px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); width: 64px; height: 64px; }
+.touch-portrait #touch-controls #touch-run { left: 20px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+.touch-portrait .touch-tools { top: auto; bottom: max(12px, env(safe-area-inset-bottom)); }
+.touch-portrait #touch-navigation { bottom: calc(90px + env(safe-area-inset-bottom, 0px)); width: 276px; flex-wrap: wrap; justify-content: center; }
+.touch-portrait #touch-navigation button { width: 64px; height: 56px; }
+@media (max-height: 380px) and (orientation: landscape) {
+	#touch-controls .touch-stick { width: 96px; height: 96px; }
+	#touch-controls .touch-fire, #touch-controls .touch-use { right: 126px; }
+	#touch-controls #touch-run { left: 126px; }
+}

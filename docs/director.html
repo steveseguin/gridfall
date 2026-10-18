@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="referrer" content="no-referrer">
+	<title>GRIDFALL Director</title>
+	<link rel="icon" href="assets/favicon.ico" sizes="16x16 32x32 48x48">
+	<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" sizes="any">
+	<style>
+		:root { color-scheme: dark; font: 15px system-ui, sans-serif; background: #101514; color: #e1d5b5; }
+		* { box-sizing: border-box; }
+		body { margin: 0 auto; padding: 16px; max-width: 1800px; }
+		.studio { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+		.stage { min-width: 0; }
+		.sidebar { max-height: calc(100vh - 80px); overflow-y: auto; }
+		.sidebar .row { gap: 8px; }
+		.sidebar label { flex-wrap: wrap; }
+		.sidebar input:not([type="checkbox"]) { min-width: 0; width: 100%; }
+		.sidebar .connection label { width: 100%; justify-content: space-between; }
+		.sidebar .connection input { width: 190px; }
+		#mix-modes { display: grid; gap: 6px; }
+		#mix-modes button { text-align: left; }
+		.setting { display: flex; justify-content: space-between; gap: 10px; margin: 12px 0; width: 100%; }
+		.setting select { max-width: 200px; }
+		#player-selection { margin-top: 12px; }
+		#player-selection label { flex: 1 1 42%; }
+		#player-selection .absent { color: #99a591; }
+		#player-selection small { font-size: 11px; }
+		#host-settings label { display: flex; justify-content: space-between; }
+		#player-invite { margin-top: 12px; }
+		#player-invite label, #player-invite input { width: 100%; }
+		#output-volume { width: 100%; margin-bottom: 14px; accent-color: #c49361; }
+		.sidebar #positions label { flex: 1 1 42%; }
+		.sidebar h2 { width: 100%; overflow-wrap: anywhere; }
+		.connected .connection .row > label, .connected #connect { display: none; }
+		header, .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+		header { justify-content: space-between; margin-bottom: 16px; }
+		h1 { margin: 0; font-size: 20px; color: #d98860; }
+		h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #a4ad99; margin: 0 0 12px; }
+		a { color: #c2cdb5; }
+		button, input, select { font: inherit; background: #1e2823; color: #e1d5b5; border: 1px solid #546050; border-radius: 2px; padding: 8px 10px; }
+		button { cursor: pointer; }
+		button:hover, button:focus-visible { border-color: #e8b879; }
+		button[aria-pressed="true"] { background: #c49361; color: #101514; }
+		button:disabled { opacity: .45; cursor: default; }
+		input { width: 170px; }
+		input[type="checkbox"] { width: auto; }
+		label { display: inline-flex; gap: 8px; align-items: center; }
+		.panel { background: #18201c; border: 1px solid #354137; padding: 12px; margin-bottom: 12px; }
+		#status { min-height: 22px; margin: 12px 0 0; color: #b6c5b0; }
+		#load-error { position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100; margin: 0; padding: 12px; background: #391b15; color: #ffe3c0; border: 1px solid #d98860; }
+		#program { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; max-height: calc(100vh - 310px); min-height: 216px; object-fit: contain; background: #000; image-rendering: pixelated; }
+		#program:fullscreen { max-height: none; width: 100vw; height: 100vh; object-fit: contain; }
+		#previews { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+		#previews button { padding: 0; text-align: left; overflow: hidden; }
+		#previews canvas { width: 100%; max-height: 108px; object-fit: contain; display: block; image-rendering: pixelated; background: #080d0c; }
+		#previews span { display: block; padding: 5px 8px; color: var(--player); }
+		#output-link { width: 100%; margin-top: 10px; font: 12px monospace; }
+		.hint { color: #99a591; font-size: 13px; margin: 10px 0 0; }
+		details { margin-top: 12px; }
+		details label { margin-top: 10px; }
+		[hidden] { display: none !important; }
+		.output .studio { display: block; }
+		body.output { max-width: none; padding: 0; overflow: hidden; background: #000; }
+		.output .controls { display: none; }
+		.output #program { max-height: none; min-height: 0; width: 100vw; height: 100vh; object-fit: contain; }
+		@media (max-width: 900px) { body { padding: 12px; } .studio { grid-template-columns: 1fr; } .sidebar { max-height: none; overflow: visible; } body:not(.output) #program { height: auto; aspect-ratio: 16 / 9; max-height: none; min-height: 0; } }
+		@media (max-width: 500px) { #previews { grid-template-columns: repeat(2, minmax(0, 1fr)); } h1 { font-size: 17px; } }
+	</style>
+</head>
+<body>
+	<header class="controls"><div><h1>GRIDFALL / DIRECTOR</h1><span id="game-version" class="hint"></span></div><a href="./">Play GRIDFALL</a></header>
+	<main class="studio">
+	<div class="stage">
+	<canvas id="program" width="768" height="432" tabindex="0" aria-label="Director program output"></canvas>
+	<section class="panel controls" style="margin-top:16px"><h2>Players / click to feature</h2><div id="previews"></div></section>
+	</div>
+	<aside class="sidebar controls">
+	<section class="panel controls connection" aria-label="Room connection">
+		<h2 id="connection-title">Room</h2>
+		<div class="row"><label>Room <input id="room" autocomplete="off"></label><label>Password <input id="password" type="password" autocomplete="off"></label><button id="connect" disabled>Watch room</button><button id="host-room" disabled>Host as spectator</button><button id="disconnect" disabled>Disconnect</button><button id="resync" disabled>Resync</button></div>
+		<details><summary>Connection settings</summary><label>VDO.Ninja server <input id="ninja" type="url" value="https://vdo.ninja/"></label></details>
+		<details id="host-settings"><summary>Host settings</summary><label>Map <select id="host-map"></select></label><label>Difficulty <select id="host-skill"><option value="0">Training</option><option value="1">Easy</option><option value="2" selected>Normal</option><option value="3">Hard</option><option value="4">Nightmare</option></select></label><label>Mode <select id="host-mode"><option value="coop">Co-op</option><option value="deathmatch">Deathmatch</option></select></label><button id="restart-match" hidden>Restart match</button><p class="hint">Keep this tab open while hosting. All four player slots remain available.</p></details>
+		<div id="player-invite" hidden><label>Player invite <input id="player-link" readonly></label><button id="copy-player">Copy player invite</button><p class="hint">Keep this tab open while hosting. The game pauses when no players are connected.</p></div>
+		<p id="status" role="status">Loading engine…</p>
+		<div id="host-offer" hidden role="status"><p>No host has responded. Would you like to host this room without playing?</p><button id="accept-host">Yes, host as spectator</button><button id="wait-host">Keep waiting</button></div>
+	</section>
+	<section class="panel controls" aria-label="Program layout">
+		<h2>Mixer</h2>
+		<div id="mix-modes"><button data-mix="fit" aria-pressed="true">Auto fit all</button><button data-mix="crop">Auto fit all + crop to fill</button><button data-mix="selected">Choose players</button></div>
+		<div id="player-selection" class="row" hidden></div>
+		<label class="setting">Layout <select id="arrangement"><option value="auto">Automatic</option><option value="row">Side by side</option><option value="column">Stacked</option><option value="grid">Grid</option><option value="focus">Featured + others</option></select></label>
+		<label class="setting">Frame <select id="frame-fit"><option value="contain">Fit whole view</option><option value="cover">Crop to fill</option></select></label>
+		<p class="hint" id="crop-hint" hidden>Crop fills each tile. Use Fit whole view to keep the full HUD.</p>
+		<div id="positions" class="row" style="margin-top:12px"></div>
+		<div class="row" style="margin-top:12px"><label><input id="labels" type="checkbox" checked> Player labels</label><button id="fullscreen">Fullscreen</button></div>
+	</section>
+	<section class="panel controls" aria-label="Audio mix">
+		<h2>Audio</h2>
+		<label class="setting">Perspective <select id="audio-player"><option value="featured">Follow featured</option><option value="-1">None / mute</option></select></label>
+		<label class="setting" for="output-volume">Output volume <output id="volume-value">50%</output></label><input id="output-volume" type="range" min="0" max="100" step="1" value="50" aria-label="Output volume">
+		<label><input id="preview-audio" type="checkbox"> Listen here</label>
+		<p class="hint">Sound follows the selected player's perspective. Listen here only affects this tab.</p>
+	</section>
+	<section class="panel controls"><div class="row"><h2>OBS output</h2><button id="copy-output">Copy browser-source URL</button></div><input id="output-link" readonly aria-label="OBS browser-source URL"><p class="hint">Add this URL as an OBS Browser Source at 1280 × 720. Layout changes here update that output. Use Interact and click the picture if audio needs unlocking.</p></section>
+	</aside>
+	</main>
+	<p id="load-error" role="alert" hidden></p>
+	<script>
+		window.addEventListener("error", function (event) {
+			if (!event.target || event.target.tagName !== "SCRIPT") return;
+			var message = document.getElementById("load-error");
+			message.textContent = "A director script could not be loaded. Reload this page to retry.";
+			message.hidden = false;
+		}, true);
+	</script>
+	<script src="room-settings.js?v=20261014-1"></script>
+	<script src="mesh.js?v=20261016-4"></script>
+	<script src="net-log.js?v=20261016-2"></script>
+	<script src="build/doom.js?v=20261016-6"></script>
+	<script src="hud.js?v=20261016-1"></script>
+	<script src="watch-host.js?v=20261016-6"></script>
+	<script src="director.js?v=20261016-6"></script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+	<title>GRIDFALL · WebAssembly</title>
+	<link rel="icon" href="assets/favicon.ico" sizes="16x16 32x32 48x48">
+	<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" sizes="any">
+	<style>
+		@font-face { font-family: "GRIDFALL HUD"; src: url("assets/gridfall-hud.woff") format("woff"); font-weight: normal; font-style: normal; font-display: swap; }
+		:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #121314; color: #eee; }
+		body { max-width: 1000px; margin: 32px auto; padding: 0 20px; }
+		h1 { margin: 0; font-size: 28px; letter-spacing: -.6px; }
+		header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 22px; }
+		header span { color: #aaa; font-size: 14px; }
+		.controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 18px 0; }
+		button, select, input { font: inherit; color: #eee; background: #292b2d; border: 1px solid #555; padding: 9px 13px; border-radius: 5px; }
+		input { max-width: 210px; }
+		fieldset { border: 1px solid #494b49; border-radius: 6px; margin-top: 24px; }
+		#invite { width: 100%; max-width: none; box-sizing: border-box; font-size: 12px; }
+		#room-status, #roster { font-size: 14px; color: #ccc; }
+		#scores { font: 14px monospace; color: #ead696; }
+		button { cursor: pointer; }
+		button:disabled { cursor: wait; opacity: .5; }
+		#start { background: #92362e; border-color: #b94b3e; font-weight: 600; }
+		label { font-size: 14px; }
+		canvas { display: block; width: 100%; aspect-ratio: 16 / 9; background: #080808; image-rendering: pixelated; outline: 2px solid #393b3d; outline-offset: 3px; }
+		canvas:focus { outline-color: #e9a15d; }
+		#game { cursor: pointer; }
+		#game.keyboard-active { cursor: none; }
+		#chat-entry, #chat-log { position: absolute; left: 0; top: 0; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; pointer-events: none; }
+		#status { min-height: 24px; color: #e9b485; margin: 14px 0 4px; }
+		#load-error { position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100; margin: 0; padding: 12px; background: #391b15; color: #ffe3c0; border: 1px solid #d98860; }
+		.help { color: #b8b9ba; line-height: 1.8; font-size: 14px; }
+		kbd { font-family: inherit; color: #eee; background: #292b2d; border-radius: 3px; padding: 2px 5px; }
+		footer { color: #808487; font-size: 12px; margin-top: 24px; }
+		a { color: #bbb; }
+		.stage { position: relative; }
+		.stage:fullscreen { display: flex; align-items: center; justify-content: center; background: #000; }
+		.stage:fullscreen canvas { width: 100%; height: 100%; object-fit: contain; outline: none; }
+		#front-menu { position: absolute; top: 0; right: 0; bottom: 0; left: 0; overflow: auto; background: rgba(17,21,20,.96); padding: 28px 8%; box-sizing: border-box; border: 4px solid #777565; border-right-color: #333831; border-bottom-color: #292e29; box-shadow: inset 0 0 0 4px #080d0d, inset 0 0 0 6px #454b40; color: #c4bd9d; font: 16px/1.5 "GRIDFALL HUD", monospace; }
+		[hidden] { display: none !important; }
+		#front-menu h2 { color: #cf704d; font: 40px/1 "GRIDFALL HUD", monospace; margin: 0 0 20px; text-transform: uppercase; text-shadow: 3px 3px #502f23; }
+		#front-menu button, #front-menu select, #front-menu input { border-radius: 0; }
+		#front-menu button, #front-menu select { font: 16px/1.5 "GRIDFALL HUD", monospace; color: #ddd0a6; background: #353c34; border: 2px solid #747865; border-right-color: #191e1b; border-bottom-color: #191e1b; padding: 8px 12px; text-shadow: 2px 2px #171e1b; }
+		#front-menu button:hover, #front-menu button:focus, #front-menu select:focus, #front-menu input:focus, #front-menu summary:focus { color: #ffe1a1; outline: 2px solid #d38d4d; outline-offset: 2px; }
+		#front-menu button:active { border-color: #191e1b #747865 #747865 #191e1b; }
+		#front-menu button:disabled { color: #8a907e; }
+		#front-menu #start { background: #793b2a; border-color: #c97b53 #361f19 #361f19 #c97b53; font-weight: normal; }
+		#front-menu .controls { gap: 8px; margin: 10px 0; }
+		#front-menu fieldset { margin: 12px 0; padding: 12px; border: 2px solid #525a49; border-radius: 0; }
+		#front-menu legend, #front-menu summary { color: #d1b77d; }
+		#front-menu label, #front-menu .help, #front-menu #room-status, #front-menu #roster { font: inherit; }
+		#front-menu input { max-width: 170px; font: 14px/1.5 monospace; color: #eee0b5; background: #0b1212; border: 2px solid #252c27; border-bottom-color: #66725a; border-right-color: #66725a; padding: 8px; }
+		#front-menu #invite { max-width: none; }
+		#front-menu select { max-width: 100%; -webkit-appearance: none; appearance: none; padding-right: 28px; background-image: linear-gradient(45deg, transparent 50%, #d1b77d 50%), linear-gradient(135deg, #d1b77d 50%, transparent 50%); background-position: right 12px top 50%, right 6px top 50%; background-size: 6px 6px; background-repeat: no-repeat; }
+		#front-menu .help { color: #9fa38c; line-height: 1.5; margin: 12px 0; }
+		#front-menu p:empty { display: none; }
+		#checkpoint-status { max-width: 600px; border-top: 2px solid #394337; padding-top: 12px; }
+		#front-menu summary { cursor: pointer; padding: 8px 0; }
+		#front-menu summary::marker { color: #d7764e; }
+		#front-menu::-webkit-scrollbar { width: 8px; background: #0b1212; }
+		#front-menu::-webkit-scrollbar-thumb { background: #747865; border: 2px solid #252c27; }
+		#front-menu input[type="range"] { -webkit-appearance: none; appearance: none; width: 144px; height: 8px; padding: 0; vertical-align: middle; background: #0b1212; }
+		#front-menu input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 20px; background: #bdad7d; border: 2px solid #ebd6a0; border-bottom-color: #675d43; border-right-color: #675d43; border-radius: 0; }
+		#front-menu input[type="range"]::-moz-range-thumb { width: 8px; height: 16px; background: #bdad7d; border: 2px solid #ebd6a0; border-bottom-color: #675d43; border-right-color: #675d43; border-radius: 0; }
+		#menu-back { margin-top: 12px; }
+		#menu-art { position: absolute; top: 0; left: 0; width: 100%; height: 100%; outline: none; pointer-events: none; }
+		#front-menu.main-page { padding: 0; border: 0; box-shadow: none; overflow: hidden; background: #111716; }
+		.menu-list { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+		.menu-list h2, .menu-list .help { position: absolute; width: 1px; height: 1px; padding: 0; margin: 0; overflow: hidden; clip: rect(0,0,0,0); }
+		#front-menu .menu-list button, #front-menu .menu-list button:hover, #front-menu .menu-list button:focus { position: absolute; margin: 0; padding: 0; border: 0; background: transparent; color: transparent; text-shadow: none; font-size: 1px; outline: none; opacity: 0; }
+		#audio-settings { display: none; }
+		#front-menu.audio-page #audio-settings { display: block; }
+		#front-menu #menu-entry { position: absolute; left: 8%; top: 43%; width: 84%; max-width: none; box-sizing: border-box; border: 1px solid #414a3c; padding: 6px; border-radius: 0; }
+		#audio-back { display: none; }
+		#front-menu.audio-page #audio-back { display: inline-block; }
+		@media (max-width: 650px), (max-height: 500px) { #front-menu { padding: 16px 20px; } #front-menu h2 { font-size: 32px; margin-bottom: 12px; } #front-menu input { max-width: 100%; box-sizing: border-box; } }
+	</style>
+	<link rel="stylesheet" href="touch.css?v=20261012-12">
+</head>
+<body>
+	<header><h1>GRIDFALL</h1><span>Survive the machine takeover</span></header>
+	<p id="setting" class="help">Day 3. The city is still ours. Most of it.</p>
+	<div class="stage">
+	<canvas id="game" width="384" height="216" tabindex="0" aria-label="GRIDFALL story and gameplay. Press a key or click for the menu."></canvas>
+	<input id="chat-entry" type="text" maxlength="160" aria-label="Message to all players. Enter sends; Escape cancels." autocomplete="off" spellcheck="false" hidden>
+	<div id="chat-log" role="status" aria-live="polite"></div>
+	<section id="front-menu" aria-label="Game menu" hidden>
+		<canvas id="menu-art" width="384" height="216" aria-hidden="true" hidden></canvas>
+		<nav id="menu-main" class="menu-list" aria-label="Choose game mode">
+			<h2>GRIDFALL</h2>
+			<button id="menu-continue" hidden>Continue campaign</button>
+			<button id="menu-solo">New campaign</button>
+			<button id="menu-multiplayer">Multiplayer</button>
+			<button id="menu-resume" hidden>Resume game</button>
+			<button id="menu-story">The story</button>
+			<button id="menu-fullscreen">Fullscreen</button>
+			<button id="menu-audio">Music / audio</button>
+			<button id="menu-quit" hidden>Quit to main menu</button>
+			<p id="checkpoint-status" class="help"></p>
+		</nav>
+		<nav id="menu-difficulty" class="menu-list" aria-label="New campaign difficulty" hidden>
+			<h2>New campaign</h2>
+			<p id="difficulty-warning" class="help"></p>
+			<button id="difficulty-back">Back</button>
+		</nav>
+		<nav id="menu-options" class="menu-list" aria-label="Game options" hidden></nav>
+		<input id="menu-entry" aria-label="Edit option" autocomplete="off" spellcheck="false" hidden>
+	<div id="menu-config" hidden>
+	<h2 id="menu-title">New campaign</h2>
+	<p id="menu-brief" class="help"></p>
+	<div class="controls">
+		<label id="map-choice">Level <select id="level" aria-label="Level"></select></label>
+		<label>Difficulty <select id="skill" aria-label="Difficulty"><option value="0">I'm too young to die</option><option value="1">Hey, not too rough</option><option value="2" selected>Hurt me plenty</option><option value="3">Ultra-Violence</option><option value="4">Nightmare!</option></select></label>
+		<button id="start" disabled>Start game</button>
+	</div>
+	<fieldset id="room-panel">
+		<legend>Room · up to 4 players</legend>
+		<div class="controls">
+			<label>Room <input id="room" maxlength="80" placeholder="Room name"></label>
+			<label>Password <input id="room-password" type="password" maxlength="120" autocomplete="off" placeholder="Optional"></label>
+			<label>Mode <select id="mode"><option value="coop">Co-op</option><option value="deathmatch">Deathmatch</option></select></label>
+			<button id="host">Start game</button><button id="join">Join room</button>
+			<button id="begin" disabled>Start match</button><button id="leave" disabled>Leave room</button>
+		</div>
+		<p id="room-status" role="status"></p>
+		<p id="roster"></p>
+		<label id="invite-label" hidden>Invite link <input id="invite" readonly aria-label="Multiplayer invite link"></label>
+		<details><summary>Connection settings</summary><p><label>VDO.Ninja URL <input id="ninja-url" type="url" value="https://vdo.ninja/" aria-label="VDO.Ninja URL"></label></p></details>
+		<p id="room-help" class="help"></p>
+	</fieldset>
+	<button id="menu-back">Back</button>
+	</div>
+	<details id="audio-settings">
+		<summary>Music / audio</summary>
+		<div class="controls">
+			<button id="music-toggle" aria-pressed="true">Music: on</button>
+			<label>Volume <input id="music-volume" type="range" min="0" max="100" value="50"></label>
+			<label>Track <select id="music-track"><option value="campaign">Campaign soundtrack</option><option value="signal-lost">Signal lost</option><option value="night-grid">Night grid</option><option value="machine-heart">Machine heart</option></select></label>
+			<button id="music-open">Open MIDI file</button><input id="music-file" type="file" accept=".mid,.midi,audio/midi" hidden>
+		</div>
+		<p id="music-status" class="help" role="status">Local MIDI files stay on this device.</p>
+		<button id="audio-back">Back</button>
+	</details>
+	</section>
+	<div id="touch-controls" aria-label="Touch console" hidden>
+		<div id="touch-play" hidden>
+			<div class="touch-tools"><button data-touch="menu">MENU</button><button data-touch="map">MAP</button><button data-touch="weapon">GUN</button><button id="touch-talk" data-touch="chat" hidden>CHAT</button></div>
+			<button id="touch-move" class="touch-stick" aria-label="Move forward or backward; slide sideways to strafe"><span>MOVE</span></button>
+			<button id="touch-look" class="touch-stick" aria-label="Turn left or right"><span>TURN</span></button>
+			<button class="touch-fire" data-hold="fire">FIRE</button><button class="touch-use" data-hold="use">USE</button>
+			<button id="touch-run" data-touch="run" aria-pressed="false">RUN</button>
+		</div>
+		<div id="touch-navigation" aria-label="Menu controls">
+			<button data-key="ArrowUp" aria-label="Previous option">&#8593;</button><button data-key="ArrowDown" aria-label="Next option">&#8595;</button>
+			<button data-key="ArrowLeft" aria-label="Decrease option">&#8592;</button><button data-key="ArrowRight" aria-label="Increase option">&#8594;</button>
+			<button data-key="Escape">BACK</button><button data-key="Enter">OK</button><button id="touch-hide" data-touch="hide">HIDE</button>
+		</div>
+		<div id="touch-chat" hidden><button data-key="Escape">CANCEL</button><button data-key="Enter">SEND</button></div>
+	</div>
+	</div>
+	<p id="status" role="status">Loading the engine and game assets…</p>
+	<p id="load-error" role="alert" hidden></p>
+	<div class="controls"><button id="menu-open">Menu / room</button><button id="fullscreen">Fullscreen</button><button id="mute" aria-pressed="false">Mute sound</button><button id="touch-toggle" aria-pressed="false">Touch controls</button></div>
+	<p id="scores" aria-live="polite"></p>
+	<p class="help">Click the game to play. Click outside it to release the keyboard. <kbd>Esc</kbd> opens the menu or goes back.<br>
+		<kbd>F10</kbd> opens or closes the menu. Fullscreen keeps the menu available.<br>
+		<kbd>↑ ↓</kbd> move · <kbd>← →</kbd> turn · <kbd>F</kbd> fire · <kbd>Space</kbd> use / open · <kbd>Enter</kbd> multiplayer chat<br>
+		<kbd>Alt</kbd> + <kbd>← →</kbd> strafe · <kbd>Shift</kbd> run · <kbd>1–8</kbd> weapons · <kbd>Tab</kbd> map · <kbd>P</kbd> pause</p>
+	<p class="help">Fight patrol bots, breachers, welders and airborne machines. Blinking charging stations explode when damaged. Weapon <kbd>6</kbd> is an arc rifle; <kbd>7</kbd> is the heavy EMP cannon.</p>
+	<footer><span id="game-version"></span> &middot; Original engine by Rebecca Heineman / Olde Skuul and id Software. <a href="LICENSE">MIT source license</a>. Original GRIDFALL maps, visuals and synthesized effects.</footer>
+	<script>
+		window.addEventListener("error", function (event) {
+			if (!event.target || event.target.tagName !== "SCRIPT") return;
+			var message = document.getElementById("load-error");
+			message.textContent = "A game script could not be loaded. Reload this page to retry.";
+			message.hidden = false;
+		}, true);
+	</script>
+	<script src="room-settings.js?v=20261014-1"></script>
+	<script src="mesh.js?v=20261016-4"></script>
+	<script src="net-log.js?v=20261016-2"></script>
+	<script src="build/doom.js?v=20261016-6"></script>
+	<script src="hud.js?v=20261016-1"></script>
+	<script src="music.js?v=20261013-6"></script>
+	<script src="doom.js?v=20261016-6"></script>
+	<script src="watch-host.js?v=20261016-6"></script>
+	<script src="multiplayer.js?v=20261016-1"></script>
+	<script src="front.js?v=20261016-1"></script>
+	<script src="touch.js?v=20261012-12"></script>
+</body>
+</html>
