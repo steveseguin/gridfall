@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Multiplayer, director and OBS guide · GRIDFALL</title>
+	<meta name="description" content="Host a GRIDFALL multiplayer game, direct player views into OBS, and understand its peer-to-peer gameplay.">
+	<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+	<style>
+		:root { color-scheme: dark; font: 17px/1.65 system-ui, sans-serif; background: #101514; color: #deded3; }
+		* { box-sizing: border-box; }
+		body { max-width: 1000px; margin: 0 auto; padding: 28px 24px 64px; }
+		a { color: #edb57a; text-underline-offset: 3px; }
+		header { border-bottom: 1px solid #354137; padding-bottom: 20px; }
+		header nav { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 15px; }
+		h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.15; color: #f1dfbb; margin: 24px 0 16px; }
+		h2 { font-size: 26px; color: #dfaa76; margin: 48px 0 12px; scroll-margin-top: 20px; }
+		h3 { font-size: 20px; color: #f1dfbb; margin: 28px 0 8px; }
+		p { margin: 12px 0; }
+		li { margin-bottom: 8px; }
+		.contents { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 15px; }
+		.contents li { margin: 0; }
+		figure { margin: 24px 0; }
+		img { display: block; width: 100%; height: auto; border: 1px solid #354137; }
+		figcaption { color: #a4ad99; font-size: 14px; margin-top: 8px; }
+		.table-wrap { overflow-x: auto; }
+		table { border-collapse: collapse; width: 100%; font-size: 16px; margin: 16px 0; }
+		th, td { padding: 12px; border: 1px solid #354137; text-align: left; vertical-align: top; }
+		th { background: #1e2823; color: #f1dfbb; }
+		code, kbd { font: .9em ui-monospace, monospace; background: #232d28; padding: 2px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+		.flow { background: #1a241f; border-left: 3px solid #c49361; padding: 16px 20px; }
+		footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #354137; font-size: 14px; }
+		@media (max-width: 600px) { body { padding: 20px 16px 40px; } th, td { padding: 8px; } }
+	</style>
+</head>
+<body>
+	<header>
+		<nav aria-label="Main"><a href="./">Play GRIDFALL</a><a href="director.html">Open director</a><a href="https://github.com/steveseguin/gridfall">Source and downloads</a></nav>
+		<h1>Multiplayer, director and OBS</h1>
+		<p>Host a game for up to four players, watch their perspectives, and send a live layout to your broadcast. One person can host while playing, or a director can host without taking a player slot.</p>
+		<nav aria-label="Guide contents"><ul class="contents">
+			<li><a href="#play">Host and join</a></li><li><a href="#roles">Pages and roles</a></li><li><a href="#director">Director layouts</a></li><li><a href="#obs">OBS output</a></li><li><a href="#network">How P2P works</a></li><li><a href="#recovery">Connection help</a></li>
+		</ul></nav>
+	</header>
+	<main>
+	<section aria-labelledby="play">
+		<h2 id="play">Host and join a game</h2>
+		<p>Everyone needs the same game build, room name, password if one is set, and VDO.Ninja connection server. The public game uses <code>https://vdo.ninja/</code> by default. To use another installation, open <strong>Connection settings</strong> before connecting. Generated invite links carry these settings.</p>
+		<ol>
+			<li>Open <a href="./">GRIDFALL</a> and choose <strong>Multiplayer → Host a game</strong>.</li>
+			<li>Enter a room name, or leave it blank to generate one. Choose <strong>Co-op</strong> or <strong>Deathmatch</strong>. Open <strong>More options</strong> for the starting map, difficulty and optional room password.</li>
+			<li>Choose <strong>Start game</strong>. You can play immediately; friends can join during the match.</li>
+			<li>Press <kbd>Esc</kbd>, open <strong>Multiplayer → Invite link</strong>, and copy the link with <kbd>Ctrl+C</kbd>. Friends open it and choose <strong>Join room</strong>. They can also choose <strong>Join a game</strong> and enter the same settings manually.</li>
+		</ol>
+		<p>Keep the host tab open. Opening the menu does not pause multiplayer. Use <kbd>Enter</kbd> for text chat and <kbd>Space</kbd> to respawn after dying. On touch devices, use <strong>CHAT</strong> and <strong>USE</strong>. Players can leave through <strong>Quit to main menu</strong>.</p>
+		<div class="table-wrap"><table>
+			<thead><tr><th scope="col">Game mode</th><th scope="col">How it plays</th></tr></thead>
+			<tbody><tr><th scope="row">Co-op</th><td>Fight through the campaign together. Keys are shared and ordinary friendly fire is disabled. Players start near the map entrance; telefrags can still clear an occupied teleport exit.</td></tr>
+			<tr><th scope="row">Deathmatch</th><td>Fight other players, track frags, and respawn at deathmatch starts. Monsters are removed and players have all keys.</td></tr></tbody>
+		</table></div>
+		<p>Placed weapons remain available for each player; ordinary supplies are consumed when collected. The host can change <strong>Multiplayer → Match settings</strong> and choose <strong>Restart match</strong>. Restarting begins a fresh match configuration for the connected room.</p>
+		<p>For players on different computers, share the hosted HTTPS address. A <code>localhost</code> invite points each person at their own computer. Share password-bearing invites only with the people you want in the room.</p>
+	</section>
+	<section aria-labelledby="roles">
+		<h2 id="roles">Choose the right page and role</h2>
+		<div class="table-wrap"><table>
+			<thead><tr><th scope="col">Role</th><th scope="col">What it does</th><th scope="col">Player slots</th></tr></thead>
+			<tbody><tr><th scope="row">Player hosting</th><td>The game page runs the authoritative match and lets the host play.</td><td>Uses one of four</td></tr>
+			<tr><th scope="row">Joining player</th><td>The game page joins the host and controls one character.</td><td>Uses one of four</td></tr>
+			<tr><th scope="row">Director: Watch room</th><td>Watches an existing match, renders player perspectives, and controls a broadcast layout.</td><td>Uses none</td></tr>
+			<tr><th scope="row">Director: Host as spectator</th><td>Runs the authoritative match and director controls without playing.</td><td>All four remain available</td></tr>
+			<tr><th scope="row">Clean output / OBS</th><td>Displays the director's chosen layout without its controls. Connects independently as a spectator.</td><td>Uses none</td></tr></tbody>
+		</table></div>
+		<p>For a four-player broadcast with a separate operator, have the operator choose <strong>Host as spectator</strong>, then <strong>Copy player invite</strong>. The director's <strong>Host settings</strong> selects the map, difficulty and game mode; <strong>Restart match</strong> applies changes after hosting begins. Keep that director tab open for the entire match. The world pauses while this kind of room has no players and resumes when someone joins.</p>
+		<p>For a casual game, let a player host and open a separate director to watch. Closing a watching director does not end the match; closing whichever page is hosting interrupts it. The clean output page cannot host or take over a match.</p>
+	</section>
+	<section aria-labelledby="director">
+		<h2 id="director">Watch and arrange player views</h2>
+		<p>Choose <strong>Open director room</strong> in the host's multiplayer menu, or open the <a href="director.html">director</a>, enter the room settings, and select <strong>Watch room</strong>. You can connect before the host starts; the director waits for the match.</p>
+		<figure><img src="screenshots/director.png" width="1440" height="1115" loading="lazy" alt="GRIDFALL director showing two player perspectives, layout controls, audio controls and the OBS output link."><figcaption>One director combines player perspectives and controls the matching output page.</figcaption></figure>
+		<div class="table-wrap"><table>
+			<thead><tr><th scope="col">Control</th><th scope="col">Use it to…</th></tr></thead>
+			<tbody><tr><th scope="row">Auto fit all</th><td>Include all connected players and preserve their whole views. Two views sit side by side; larger groups use a grid.</td></tr>
+			<tr><th scope="row">Auto fit all + crop to fill</th><td>Include all players and fill each tile. Cropping can cut off edges and parts of the HUD.</td></tr>
+			<tr><th scope="row">Choose players</th><td>Select particular player slots. The selection remains when a player leaves and when that slot becomes occupied again.</td></tr>
+			<tr><th scope="row">Layout</th><td>Choose Automatic, Side by side, Stacked, Grid, or Featured + others. The featured layout gives the first view a larger area.</td></tr>
+			<tr><th scope="row">Frame</th><td>Choose Fit whole view to retain the HUD, or Crop to fill to fill the tile.</td></tr>
+			<tr><th scope="row">View selectors</th><td>Reorder player perspectives. The first visible view is the featured audio perspective.</td></tr>
+			<tr><th scope="row">Player previews</th><td>Click a preview to show that player alone. Choose Auto fit all or select multiple players to return to a combined view.</td></tr>
+			<tr><th scope="row">Player labels / Fullscreen</th><td>Toggle the P1–P4 labels or expand the program picture.</td></tr></tbody>
+		</table></div>
+		<h3>Audio follows a perspective</h3>
+		<p><strong>Follow featured</strong> uses the first visible player's game sound effects. Select a fixed player to keep that perspective while changing the picture, or choose <strong>None / mute</strong>. A selected player who is absent produces silence. <strong>Output volume</strong> sets the program level; <strong>Listen here</strong> only enables monitoring in the director tab.</p>
+		<p>The director generates game sound effects locally. It does not capture players' microphones, browser audio, or their selected music tracks. Add commentary and any separate music through your broadcasting setup.</p>
+	</section>
+	<section aria-labelledby="obs">
+		<h2 id="obs">Add the clean output to OBS</h2>
+		<ol>
+			<li>Connect the director, choose your layout and audio perspective, and click <strong>Copy browser-source URL</strong>.</li>
+			<li>In OBS, add a <strong>Browser Source</strong>, paste the URL, and set its dimensions to <strong>1280 × 720</strong>.</li>
+			<li>If audio is silent, open the source's <strong>Interact</strong> window and click the picture to allow playback. Also check the director's perspective and output volume.</li>
+			<li>Leave the director open to change the output live. Change views, ordering, labels, crop and audio there; the output follows the matching director.</li>
+		</ol>
+		<p>The clean output is the broadcast view, sometimes called an overlay. It contains the game picture and HUD, with an opaque black background around fitted views. Position and scale it in your OBS scene, then layer your own camera, branding or other overlays above it as needed.</p>
+		<p>Use the generated output URL rather than the ordinary director URL: it includes the room, initial layout and an output-control key. Bookmark the connected director's address so you can reopen the same controls. Treat both URLs as private control links. A newly opened generic director gets a different key and does not automatically control an older output.</p>
+		<p>You can open the same output URL in multiple browser sources or on another computer that can reach the hosted game. Each output joins the room and renders locally, so each needs to load the game and catch up. To produce different layouts, use separate director sessions and copy each one's output URL. Keep the browser source active when you need continuous output; reloading it requires another catch-up.</p>
+	</section>
+	<section aria-labelledby="network">
+		<h2 id="network">How peer-to-peer gameplay works</h2>
+		<p>Each player, director and output page loads the same WebAssembly engine and GRIDFALL assets. VDO.Ninja provides the data-channel room connections through a hidden iframe. There is no dedicated GRIDFALL game server: one participant's browser is the authoritative host.</p>
+		<p class="flow"><strong>Player inputs → host simulation → ordered match history → local simulation and rendering in every participant.</strong><br>Director layout commands travel separately to the matching output pages.</p>
+		<h3>Inputs and an authoritative host</h3>
+		<p>Players send numbered commands for movement, turning, firing, using objects and changing weapons. The host advances the world at 15 network ticks per second, decides which commands and player-slot changes belong to each tick, and sends that ordered history with acknowledgements and a game-state checksum. Other browsers run those same commands through the same engine and compare the result.</p>
+		<p>The network carries commands, room state, synchronization information, chat and director controls. Player video and audio streams are not sent to the director: it renders the perspectives and sound effects from its own simulation. A slow guest's acknowledgement does not stop the host or the other players; a guest that falls too far behind can be removed from its slot and rejoin.</p>
+		<h3>Responsive movement with local prediction</h3>
+		<p>Your browser previews your own movement and weapon pose using commands the host has not acknowledged yet. When authoritative updates arrive, it removes acknowledged commands and reapplies the remaining ones from the confirmed state. Camera and weapon motion are interpolated between updates. Prediction makes controls respond promptly, while authoritative world outcomes such as damage remain governed by the host's simulation.</p>
+		<p>A displayed frame is therefore not necessarily a new network tick. Players can see smoothly drawn motion between world updates; a director follows the committed match history rather than a player's unconfirmed prediction.</p>
+		<h3>Joining, repairing and replaying</h3>
+		<p>A joining browser receives the match configuration and input history, then replays it to catch up. Players synchronize before being admitted to an available slot; directors do the same without taking one. Missing commands and history can be requested again. The transport suppresses duplicate messages, caches recent broadcasts, and can forward a targeted retry through another connected peer when the direct route is not responding.</p>
+		<p>If a checksum disagrees, the browser can replay the confirmed inputs to restore its state. The director's <strong>Resync</strong> button requests this recovery without restarting the players. Longer-running rooms take more work to catch up with. History is capped at 216,000 ticks—about four hours of advancing gameplay, including in-room match restarts. Start a new room for a longer session.</p>
+		<h3>Identity, build compatibility and host availability</h3>
+		<p>Each connection generates a signing key. Signed messages identify that connection and allow peers to check forwarded traffic; this is not an account login. Director layout updates also carry proof of the output-control key, so ordinary room participants do not gain layout control just by joining. Play with people you trust: signatures do not make a modified client or host cheat-proof.</p>
+		<p>Participants must agree on the release, engine and asset hashes, and command protocol. If the game reports different builds, reload every player, director and output from the same deployment. A background worker helps the host continue while its tab is hidden, but the host computer must remain awake and connected. There is no automatic transfer of a running match to a replacement host.</p>
+		<p>For implementation details, see <a href="https://github.com/steveseguin/gridfall/blob/main/docs/mesh.js">the signed transport</a>, <a href="https://github.com/steveseguin/gridfall/blob/main/docs/watch-host.js">host and replay logic</a>, <a href="https://github.com/steveseguin/gridfall/blob/main/docs/doom.js">player prediction and rendering</a>, and <a href="https://github.com/steveseguin/gridfall/blob/main/docs/director.js">director rendering and output controls</a>.</p>
+	</section>
+	<section aria-labelledby="recovery">
+		<h2 id="recovery">Connection help</h2>
+		<div class="table-wrap"><table>
+			<thead><tr><th scope="col">What you see</th><th scope="col">What to do</th></tr></thead>
+			<tbody><tr><th scope="row">Waiting for a host</th><td>Check the room, password, server and game build. After about 12 seconds without a host, choose to keep waiting or explicitly host a fresh match in that room. Only one person should start hosting.</td></tr>
+			<tr><th scope="row">Room full</th><td>Wait for one of the four player slots, or use the director to watch without a slot.</td></tr>
+			<tr><th scope="row">Connection interrupted</th><td>Let the short repair attempt finish. If the player recovery menu appears, choose Rejoin room. Refreshing a guest can rejoin automatically when browser session storage is available.</td></tr>
+			<tr><th scope="row">Host stopped responding</th><td>Keep or restore the original host if possible. After about ten seconds without progress, players get recovery options. Host a new room to start over and share its new invite; it does not preserve the interrupted match.</td></tr>
+			<tr><th scope="row">Director is behind</th><td>Use Resync and allow time to catch up. Confirm the host remains connected and all pages use the same build.</td></tr>
+			<tr><th scope="row">Output ignores layout changes</th><td>Reopen the saved director control address, or copy a fresh output URL from the director you are using and replace it in OBS.</td></tr>
+			<tr><th scope="row">Lag or uneven motion</th><td>Open Multiplayer → Connection stats. Compare round-trip delay, jitter, input acknowledgement time, pending inputs and resyncs. Save connection report downloads diagnostics without the room name or password.</td></tr></tbody>
+		</table></div>
+	</section>
+	</main>
+	<footer><a href="./">Play GRIDFALL</a> · <a href="director.html">Open director</a> · <a href="https://github.com/steveseguin/gridfall/blob/main/BUILD.md">Build and host your own copy</a></footer>
+</body>
+</html>

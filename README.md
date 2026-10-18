@@ -4,11 +4,17 @@ A browser FPS set during a machine takeover: a 24-map campaign, four-player co-o
 
 **[Play GRIDFALL](https://steveseguin.github.io/gridfall/)** · **[Open the director](https://steveseguin.github.io/gridfall/director.html)**
 
+![GRIDFALL gameplay in the Transit Depot, with the first-person view and player HUD.](docs/screenshots/gameplay.png)
+
 Choose **New campaign** to play solo. Use the arrow keys to move and turn, **F** to fire, **Space** to use doors and controls, and **Esc** for the menu. Touch controls appear on phones and tablets.
 
 For multiplayer, choose **Multiplayer → Host a game**, then share the **Invite link** from the room menu. Up to four players can join. Keep the host tab open. Connections use the hosted VDO.Ninja service by default; choose another VDO.Ninja installation under **Connection settings**. No camera or microphone is needed. Room invite links include the password when one is set.
 
 The director can watch a room or **Host as spectator**, leaving all four player slots available. Choose a layout, then **Copy browser-source URL** to add the clean output to OBS at 1280 × 720.
+
+![GRIDFALL director combining two player views, with layout, audio and OBS output controls.](docs/screenshots/director.png)
+
+Read the **[multiplayer, director and OBS guide](https://steveseguin.github.io/gridfall/guide.html)** for room setup, spectator hosting, layouts, output links, audio, connection recovery, and how peer-to-peer gameplay and local prediction work.
 
 ## Run locally
 
