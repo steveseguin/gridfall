@@ -1,0 +1,34 @@
+{
+  "compiler": "psxw-lift",
+  "compiler_revision": "40d0989cf222ae2a2912def47bc64a2cece2632b",
+  "translated_functions": 383,
+  "linked_functions": 302,
+  "platform_adapters": [
+    "ps1_fatal",
+    "ps1_read",
+    "ps1_sound",
+    "ps1_stop_sound"
+  ],
+  "symbols": {
+    "doom_init": 2147636508,
+    "doom_start": 2147639092,
+    "doom_step": 2147640208,
+    "doom_render_lerp": 2147641260,
+    "doom_state": 2147642100,
+    "doom_weapon": 2147641988,
+    "doom_intro": 2147642092,
+    "directory_buffer": 2148303940,
+    "forwardmove": 2147803408,
+    "sidemove": 2147803400,
+    "palette": 2148144340,
+    "PadAttack": 2147803384,
+    "PadUse": 2147803380,
+    "PadSpeed": 2147803376
+  },
+  "sha256": {
+    "gridfall.exe": "b0bafb14a5b879fc709f25396177eee3c218ef07c586b5fc496ac4384b6aab55",
+    "gridfall.wasm": "7c4893afc745d228a7e58d2dde6ece9fb2e0db35ad8cedcfeef7296ea30522e6",
+    "GRIDFALL.DAT": "d46c2dbb0ff765dc6b9204d9cc9a2690ea04b806b5d72d86f4e1ba9ffccede18",
+    "SOUND.BNK": "14c998d402c2b6cb6e5c59106371a1452dcb15e280ee184c46972503d0507ab8"
+  }
+}

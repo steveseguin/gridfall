@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<iso_project><track type="data">
+<identifiers system="PLAYSTATION" application="PLAYSTATION" volume="GRIDFALL_PS1" volume_set="GRIDFALL_PS1" publisher="GRIDFALL"/>
+<directory_tree>
+<file name="SYSTEM.CNF" type="data" source="${PROJECT_SOURCE_DIR}/disc/system.cnf"/>
+<file name="GRIDFALL.EXE" type="data" source="gridfall.exe"/>
+<file name="GRIDFALL.DAT" type="data" source="${PROJECT_SOURCE_DIR}/build/GRIDFALL.DAT"/>
+<file name="SOUND.BNK" type="data" source="${PROJECT_SOURCE_DIR}/build/SOUND.BNK"/>
+<dummy sectors="32"/>
+</directory_tree></track></iso_project>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRIDFALL · PS1 round trip</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#10191e;color:#e8f0ed}*{box-sizing:border-box}
+body{margin:0;padding:32px 20px}main{max-width:1100px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
+h1{font-size:clamp(32px,6vw,58px);letter-spacing:-.05em;margin:0}p{line-height:1.6;color:#aebfbd}.eyebrow{font:12px monospace;letter-spacing:.15em;color:#f3bd72;margin:0 0 8px}.badge{border:1px solid #46625a;padding:8px 12px;border-radius:30px;color:#9ee1bc;font:12px monospace}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 265px;gap:24px}.screen{background:#050b0e;border:1px solid #334745;border-radius:10px;overflow:hidden}
+canvas{display:block;width:100%;height:auto;aspect-ratio:4/3;image-rendering:pixelated;outline:none}.status{display:flex;justify-content:space-between;padding:14px 18px;border-top:1px solid #334745;font:13px monospace;color:#b5cbc2;gap:12px}
+aside{padding:22px;background:#19262b;border:1px solid #334745;border-radius:10px}h2{font-size:18px;margin:0 0 8px}aside p{font-size:13px;margin:0 0 25px}label{display:block;font-size:14px;margin-top:22px}label span{float:right;color:#f3bd72;font-family:monospace}input[type=range]{width:100%;margin:14px 0;accent-color:#e9b66e}
+button{font:inherit;border:1px solid #536962;background:#253b39;color:#edf3e9;padding:10px 16px;border-radius:5px;cursor:pointer}button:hover{background:#34504a}button:disabled{opacity:.4;cursor:wait}button.primary{background:#efbd78;border-color:#efbd78;color:#162122;font-weight:650}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.help{font-size:13px}.help kbd{color:#f2ddbc}.error{color:#ffa78e}details{margin-top:22px;color:#afc2bd;font-size:13px}summary{cursor:pointer}a{color:#9fe4c9}footer{font-size:12px;color:#879d96;margin-top:24px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}body{padding:20px 12px}aside{padding:18px}}
+</style>
+</head>
+<body><main>
+<header><div><p class="eyebrow">C → PLAYSTATION → WASM</p><h1>GRIDFALL</h1></div><span class="badge">PS1 ROUND TRIP</span></header>
+<div class="layout"><section>
+<div class="screen"><canvas id="screen" width="320" height="240" tabindex="0" aria-label="GRIDFALL game. Use arrow keys to move, Space to fire and E to use."></canvas><div class="status"><span id="status" role="status">Loading PS1 build…</span><span id="stats"></span></div></div>
+<div class="actions"><button class="primary" id="start" disabled>Skip intro / Play</button><button id="pause" disabled>Pause</button><button id="restart" disabled>Restart map</button></div>
+<p class="help"><kbd>↑ ↓</kbd> move · <kbd>← →</kbd> turn · <kbd>A D</kbd> strafe · <kbd>Shift</kbd> run<br><kbd>Space</kbd> fire · <kbd>E</kbd> use · <kbd>1–8</kbd> weapon · <kbd>P</kbd> pause</p>
+</section><aside>
+<h2>Live mods</h2><p>Change the running game's PS1 memory. Apply while moving or looking around.</p>
+<label for="speed">Movement <span id="speed-value">1.00×</span></label><input id="speed" type="range" min="0.25" max="3" step="0.05" value="1" disabled>
+<label for="tint">Palette shift <span id="tint-value">0%</span></label><input id="tint" type="range" min="0" max="1" step="0.01" value="0" disabled>
+<button id="reset-mods" disabled>Reset mods</button>
+<details><summary>What is running?</summary><p>The game logic and software renderer were compiled for PS1, then translated from that PS-X executable by psxw into WebAssembly. The browser supplies display, controls, disc data, and audio.</p><p><a href="build.json">Build hashes and compiler revision</a> · <a href="gridfall.exe" download>PS1 executable</a></p></details>
+</aside></div><footer>Transit Depot · Map 1 · Original GRIDFALL artwork and sounds</footer>
+<script type="module" src="app.mjs"></script>
+</main></body></html>

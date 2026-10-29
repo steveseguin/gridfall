@@ -37,6 +37,9 @@ python browser/build.py
 
 This rebuilds the engine and game data directly into `docs/build/`. All required maps, artwork and asset-layout metadata are included. See [BUILD.md](BUILD.md) for setup and editing details.
 
+A standalone [PS1 port and build instructions](ps1/README.md) are also available,
+including a browser version recompiled from the PS1 executable.
+
 ## License
 
 GRIDFALL code and original game content are provided under the [MIT license](LICENSE). The engine derives from Rebecca Heineman / Olde Skuul's [Doom 3DO source release](https://github.com/Olde-Skuul/doom3do). Its copyright notice is retained. GRIDFALL artwork is AI-generated, music was generated with MIDI-LLM and rendered with the game's synthesizer, and sound effects are synthesized. Original Doom game artwork, recordings and map WADs are not included.
